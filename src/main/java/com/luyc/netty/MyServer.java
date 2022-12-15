@@ -20,23 +20,21 @@ public class MyServer implements Runnable{
 
     private Channel channel;
 
+    private ServerHandler handler;
+
     public MyServer(Integer port) {
         this.port = port;
     }
 
-    public Integer getPort() {
-        return port;
-    }
-
-    public void setPort(Integer port) {
-        this.port = port;
-    }
 
     @Override
     public void run() {
         if(port == null){
             throw new RuntimeException("netty port is missing!");
         }
+        MyServer server = this;
+        ServerHandler serverHandler = new ServerHandler(server);
+        this.handler = serverHandler;
         EventLoopGroup bossGroup = new NioEventLoopGroup(); // (1)
         EventLoopGroup workerGroup = new NioEventLoopGroup();
         try {
@@ -46,7 +44,7 @@ public class MyServer implements Runnable{
                     .childHandler(new ChannelInitializer<SocketChannel>() { // (4)
                         @Override
                         public void initChannel(SocketChannel ch) throws Exception {
-                            ch.pipeline().addLast(new ServerHandler());
+                            ch.pipeline().addLast(serverHandler);
                         }
                     })
                     .option(ChannelOption.SO_BACKLOG, 128)          // (5)

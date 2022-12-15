@@ -16,6 +16,13 @@ import java.util.Map;
 public class ServerHandler extends ChannelInboundHandlerAdapter {
     private static final Logger log = LoggerFactory.getLogger(ServerHandler.class);
 
+
+    private MyServer server;
+
+    public ServerHandler(MyServer server) {
+        this.server = server;
+    }
+
     @Override
     public void channelRegistered(ChannelHandlerContext ctx) throws Exception {
         log.info("client register");

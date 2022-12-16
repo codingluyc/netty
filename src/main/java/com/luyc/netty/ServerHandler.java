@@ -11,17 +11,19 @@ import org.slf4j.LoggerFactory;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class ServerHandler extends ChannelInboundHandlerAdapter {
     private static final Logger log = LoggerFactory.getLogger(ServerHandler.class);
 
 
-    private MyServer server;
+    private volatile ConcurrentHashMap<String,String> tempMap = new ConcurrentHashMap<>();
 
-    public ServerHandler(MyServer server) {
-        this.server = server;
-    }
+
+    private ReentrantLock lock = new ReentrantLock();
 
     @Override
     public void channelRegistered(ChannelHandlerContext ctx) throws Exception {
@@ -50,28 +52,34 @@ public class ServerHandler extends ChannelInboundHandlerAdapter {
         log.info("client inactive");
     }
 
+    @Override
+    public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {
+        String temp = tempMap.get(ctx.channel().id().toString());
+        log.info("received msg:{}",temp);
+        tempMap.put(ctx.channel().id().toString(),"");
+        String[] strs = temp.split("\n");
+        super.channelReadComplete(ctx);
+    }
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-        ByteBuf in = (ByteBuf) msg;
-        try {
-            StringBuilder sb = new StringBuilder();
-            while (in.isReadable()) { // (1)
-                sb.append((char) in.readByte());
-            }
-            log.info("receive msg:{}",sb.toString());
-        } finally {
-            ReferenceCountUtil.release(msg); // (2)
+        String str = (String) msg;
+        String temp = tempMap.get(ctx.channel().id().toString());
+        if(temp == null){
+            temp = "";
         }
-        ByteBuf byteBuf = Unpooled.buffer(256);
-        byteBuf = byteBuf.writeBytes("hi this is server".getBytes(StandardCharsets.UTF_8));
-        Channel channel = ctx.channel();
-        ctx.writeAndFlush(byteBuf);
+        StringBuilder sb = new StringBuilder(temp);
+        sb.append(str);
+        temp = sb.toString();
+        tempMap.put(ctx.channel().id().toString(),temp);
     }
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
         log.error("server handler error",cause);
         ctx.close();
+    }
+
+    public static void main(String[] args) {
     }
 }

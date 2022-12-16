@@ -25,12 +25,12 @@ public class NettyApplication {
         MyServer server = new MyServer(4567);
         executor.execute(server);
 
-        //start client
-        MyClient client = new MyClient("localhost",4567);
-        executor.execute(client);
-
-        Thread.currentThread().sleep(5000L);
-        client.writeAndFlush("hello world");
+//        //start client
+//        MyClient client = new MyClient("localhost",4567);
+//        executor.execute(client);
+//
+//        Thread.currentThread().sleep(5000L);
+//        client.writeAndFlush("hello world");
     }
 
 }

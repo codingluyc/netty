@@ -7,11 +7,14 @@ import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.handler.codec.string.StringDecoder;
+import io.netty.handler.codec.string.StringEncoder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.nio.charset.StandardCharsets;
+import java.util.concurrent.ConcurrentHashMap;
 
 
 public class MyServer implements Runnable{
@@ -20,7 +23,7 @@ public class MyServer implements Runnable{
 
     private Channel channel;
 
-    private ServerHandler handler;
+
 
     public MyServer(Integer port) {
         this.port = port;
@@ -33,8 +36,6 @@ public class MyServer implements Runnable{
             throw new RuntimeException("netty port is missing!");
         }
         MyServer server = this;
-        ServerHandler serverHandler = new ServerHandler(server);
-        this.handler = serverHandler;
         EventLoopGroup bossGroup = new NioEventLoopGroup(); // (1)
         EventLoopGroup workerGroup = new NioEventLoopGroup();
         try {
@@ -44,7 +45,8 @@ public class MyServer implements Runnable{
                     .childHandler(new ChannelInitializer<SocketChannel>() { // (4)
                         @Override
                         public void initChannel(SocketChannel ch) throws Exception {
-                            ch.pipeline().addLast(serverHandler);
+                            ch.pipeline().addLast(new StringDecoder());
+                            ch.pipeline().addLast(new ServerHandler());
                         }
                     })
                     .option(ChannelOption.SO_BACKLOG, 128)          // (5)

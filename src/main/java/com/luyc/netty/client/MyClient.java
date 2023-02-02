@@ -1,23 +1,22 @@
-package com.luyc.netty;
+package com.luyc.netty.client;
 
 import io.netty.bootstrap.Bootstrap;
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import io.netty.handler.codec.LineBasedFrameDecoder;
+import io.netty.handler.codec.string.StringDecoder;
+import io.netty.handler.codec.string.StringEncoder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.nio.charset.StandardCharsets;
 
 /**
  * @author luyc
  * @since 2022/12/15 9:31
  */
 public class MyClient implements Runnable{
-    private static final Logger log = LoggerFactory.getLogger(ClientInboundHandler.class);
+    private static final Logger log = LoggerFactory.getLogger(MyClient.class);
 
     // 服务端地址
     private String serverHost;
@@ -25,7 +24,7 @@ public class MyClient implements Runnable{
     //服务端端口
     private Integer serverPort;
 
-    //工作组
+    //工作组 用于接收
     private EventLoopGroup workerGroup;
 
     //通道
@@ -55,6 +54,9 @@ public class MyClient implements Runnable{
             b.handler(new ChannelInitializer<SocketChannel>() {
                 @Override
                 public void initChannel(SocketChannel ch) throws Exception {
+                    ch.pipeline().addLast(new LineBasedFrameDecoder(1024));
+                    ch.pipeline().addLast(new StringDecoder());
+                    ch.pipeline().addLast(new StringEncoder());
                     ch.pipeline().addLast(new ClientInboundHandler());
                 }
             });
@@ -81,10 +83,16 @@ public class MyClient implements Runnable{
             return;
         }
         if(channel.isWritable()) {
-            byte[] bytes = msg.getBytes(StandardCharsets.UTF_8);
-            ByteBuf byteBuf = Unpooled.buffer(bytes.length);
-            byteBuf = byteBuf.writeBytes(bytes);
-            channel.writeAndFlush(byteBuf);
+//            byte[] bytes = msg.getBytes(StandardCharsets.UTF_8);
+//            ByteBuf byteBuf = Unpooled.buffer(bytes.length);
+//            byteBuf = byteBuf.writeBytes(bytes);
+//            channel.writeAndFlush(byteBuf);
+            ChannelFuture channelFuture = channel.writeAndFlush(msg);
+            channelFuture.addListener(new FutureListener());
+
+            log.info("send msg:{}",msg);
+        }else{
+            log.error("channel is not writable, msg={}",msg);
         }
     }
 }

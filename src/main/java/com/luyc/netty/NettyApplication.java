@@ -1,6 +1,8 @@
 package com.luyc.netty;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import com.luyc.netty.client.MyClient;
+import com.luyc.netty.server.MyServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
@@ -25,12 +27,17 @@ public class NettyApplication {
         MyServer server = new MyServer(4567);
         executor.execute(server);
 
+
 //        //start client
 //        MyClient client = new MyClient("localhost",4567);
 //        executor.execute(client);
 //
-//        Thread.currentThread().sleep(5000L);
-//        client.writeAndFlush("hello world");
+//        // make sure that server thread has started
+//        Thread.sleep(3000L);
+//        for(int i =0;i<50000;i++) {
+//            client.writeAndFlush("hello world "+i+"*******************************************************************************************************************************************\n");
+//        }
+//        log.info("send completed");
     }
 
 }

@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration scan="true" scanPeriod="60 seconds" debug="true">
+
+    <contextName>logsback</contextName>
+    <!--设置自定义pattern属性-->
+    <property name="pattern" value="%d{HH:mm:ss.SSS} [%-5level] [%thread] [%logger] [%method] [%line] %msg%n"/>
+
+    <!--控制台输出日志-->
+    <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
+        <!--设置控制台输出日志的格式-->
+        <encoder>
+            <pattern>${pattern}</pattern>
+        </encoder>
+    </appender>
+
+<!--    按天输出日志，保存7天-->
+    <appender name="info_file" class="ch.qos.logback.core.rolling.RollingFileAppender">
+<!--        <filter class="ch.qos.logback.classic.filter.LevelFilter">-->
+<!--            &lt;!&ndash;过滤 INFO&ndash;&gt;-->
+<!--            <level>INFO</level>-->
+<!--            &lt;!&ndash;匹配到就禁止&ndash;&gt;-->
+<!--            <onMatch>ACCEPT</onMatch>-->
+<!--            &lt;!&ndash;没有匹配到就允许&ndash;&gt;-->
+<!--            <onMismatch>DENY</onMismatch>-->
+<!--        </filter>-->
+
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>xczk-%d{yyyy-MM-dd}.log</fileNamePattern>
+            <maxHistory>7</maxHistory>
+        </rollingPolicy>
+
+        <encoder>
+            <pattern>${pattern}</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="error_file" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <!--过滤 INFO-->
+            <level>ERROR</level>
+            <!--匹配到就禁止-->
+            <onMatch>ACCEPT</onMatch>
+            <!--没有匹配到就允许-->
+            <onMismatch>DENY</onMismatch>
+        </filter>
+
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>xczk-%d{yyyy-MM-dd}-error.log</fileNamePattern>
+            <maxHistory>7</maxHistory>
+        </rollingPolicy>
+
+        <encoder>
+            <pattern>${pattern}</pattern>
+        </encoder>
+    </appender>
+
+<!--    根root logger-->
+    <root level="info">
+        <appender-ref ref="console"/>
+        <appender-ref ref="info_file"/>
+        <appender-ref ref="error_file"/>
+    </root>
+
+</configuration>

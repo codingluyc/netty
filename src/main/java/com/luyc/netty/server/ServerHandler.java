@@ -1,18 +1,11 @@
-package com.luyc.netty;
+package com.luyc.netty.server;
 
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
 import io.netty.channel.*;
 import io.netty.channel.socket.nio.NioSocketChannel;
-import io.netty.util.ReferenceCountUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.InetSocketAddress;
-import java.net.SocketAddress;
-import java.nio.charset.StandardCharsets;
-import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -58,7 +51,7 @@ public class ServerHandler extends ChannelInboundHandlerAdapter {
         log.info("received msg:{}",temp);
         tempMap.put(ctx.channel().id().toString(),"");
         String[] strs = temp.split("\n");
-        super.channelReadComplete(ctx);
+//        super.channelReadComplete(ctx);
     }
 
     @Override
